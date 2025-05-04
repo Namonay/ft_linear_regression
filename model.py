@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import csv
 
 class Model:
     def __init__(self, data_name="data.csv", learning_rate=0.01, epochs=2000):
@@ -17,6 +18,7 @@ class Model:
             self.cost_history = []
             self.m = len(self.data)
             self.normalize_values()
+
     def __estimate_price(self, mileage):
         return self.theta0 + (self.theta1 * mileage)
 
@@ -46,7 +48,18 @@ class Model:
             tmp_t0, tmp_t1 = self.calculate_thetas()
             self.theta0 -= self.learning_rate * tmp_t0
             self.theta1 -= self.learning_rate * tmp_t1
-        pass
+
+    def export(self):
+        theta1_raw = self.theta1 / (self.km_max - self.km_min)
+        theta0_raw = self.theta0 - self.theta1 * self.km_min / (self.km_max - self.km_min)
+        data = [
+            ["theta0", "theta1"],
+            [theta0_raw, theta1_raw]
+        ]
+        with open("thetas.csv", mode="w", newline="") as file:
+            writer = csv.writer(file)
+
+            writer.writerows(data)
     def visualize(self):
         km_range = np.linspace(min(self.data["km"]), max(self.data["km"]), 100)
         predicted_prices = self.theta0 + (self.theta1 * (km_range - self.km_min) / (self.km_max - self.km_min))
@@ -67,8 +80,8 @@ class Model:
         cost.set_ylabel("Coût")
         cost.grid(True)
         plt.show()
-        pass
 
 first_model = Model()
 first_model.train()
+first_model.export()
 first_model.visualize()
