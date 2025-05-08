@@ -3,8 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 
+from confidence import Confidence
+
+data_path="datasets/data.csv"
+
 class Model:
-    def __init__(self, data_name="data.csv", learning_rate=0.01, epochs=2000):
+    def __init__(self, data_name=data_path, learning_rate=0.01, epochs=2000):
         with open(data_name, 'r') as file:
             self.data = pd.read_csv(file)
             self.km = [self.data["km"][i] for i in range(len(self.data))]
@@ -61,6 +65,8 @@ class Model:
 
             writer.writerows(data)
     def visualize(self):
+        confidence = Confidence(data_path=data_path)
+
         km_range = np.linspace(min(self.data["km"]), max(self.data["km"]), 100)
         predicted_prices = self.theta0 + (self.theta1 * (km_range - self.km_min) / (self.km_max - self.km_min))
         fig, (regression, cost) = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
@@ -73,11 +79,11 @@ class Model:
         regression.set_title("Linear Regression")
         regression.legend()
         regression.grid(True)
-
+        regression.text(0.05, 0.95, f"Confidence: {confidence.get_confidence()}", transform=regression.transAxes, fontsize=8, verticalalignment='top', horizontalalignment='left', color="black")
         cost.plot(range(1, len(self.cost_history) + 1), self.cost_history, color='green')
-        cost.set_title("Coût vs Itérations")
-        cost.set_xlabel("Itérations")
-        cost.set_ylabel("Coût")
+        cost.set_title("Cost vs Epochs")
+        cost.set_xlabel("Epochs")
+        cost.set_ylabel("Cost")
         cost.grid(True)
         plt.show()
 
